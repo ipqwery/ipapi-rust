@@ -145,7 +145,13 @@ pub async fn query_ip(ip: &str) -> Result<IPInfo, Error> {
 ///
 /// Returns an error if the network request fails or the response cannot be deserialized.
 pub async fn query_bulk(ips: &[&str]) -> Result<Vec<IPInfo>, Error> {
-    let ip_list = ips.join(",");
+    if ips.is_empty() {
+        return Ok(vec![]);
+    }
+    let mut ip_list = ips.join(",");
+    if ips.len() == 1 {
+        ip_list.push(',');
+    }
     let url = format!("{}{}", BASE_URL, ip_list);
     let response = reqwest::get(&url).await?.json::<Vec<IPInfo>>().await?;
     Ok(response)
